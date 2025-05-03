@@ -1,0 +1,531 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using NarodnaSkupstina.Entiteti;
+
+namespace NarodnaSkupstina
+{
+    #region NarodniPoslanik
+    public class NarodniPoslanikBasic
+    {
+        public int NarPosId { get; set; }
+        public Int64 Jmbg { get; set; }
+        public string LicnoIme { get; set; }
+        public string ImeRoditelja { get; set; }
+        public string Prezime { get; set; }
+        public string IzbornaLista { get; set; }
+        public DateTime DatumRodj { get; set; }
+        public string MestoRodj { get; set; }
+        public string Ulica { get; set; }
+        public int Broj { get; set; }
+        public string Mesto { get; set; }
+        public string BrTel { get; set; }
+        public string BrMobTel { get; set; }
+        public char StalniRadniOdnosFlag { get; set; }
+        public PoslanickaGrupaBasic PredsednikPG { get; set; }
+        public PoslanickaGrupaBasic ZamenikPG { get; set; }
+        public PoslanickaGrupaBasic ClanPG { get; set; }
+        public RadnoTeloBasic PredsednikRT { get; set; }
+        public RadnoTeloBasic ZamenikRT { get; set; }
+        public RadnoTeloBasic ClanRT { get; set; }
+        public virtual IList<PredlogPoslanikaBasic> PravniAkti { get; set; }
+        public virtual IList<VanrednaSednicaBasic> Sednice { get; set; }
+
+        public NarodniPoslanikBasic()
+        {
+            PravniAkti = new List<PredlogPoslanikaBasic>();
+            Sednice = new List<VanrednaSednicaBasic>();
+        }
+
+        public NarodniPoslanikBasic(int narPosId, long jmbg, string licnoIme, string imeRoditelja, string prezime,
+            string izbornaLista, DateTime datumRodj, string mestoRodj, string ulica, int broj, string mesto,
+            string brTel, string brMobTel, char stalniRadniOdnosFlag)
+        {
+            NarPosId = narPosId;
+            Jmbg = jmbg;
+            LicnoIme = licnoIme;
+            ImeRoditelja = imeRoditelja;
+            Prezime = prezime;
+            IzbornaLista = izbornaLista;
+            DatumRodj = datumRodj;
+            MestoRodj = mestoRodj;
+            Ulica = ulica;
+            Broj = broj;
+            Mesto = mesto;
+            BrTel = brTel;
+            BrMobTel = brMobTel;
+            StalniRadniOdnosFlag = stalniRadniOdnosFlag;
+        }
+
+        public NarodniPoslanikBasic(int narPosId, long jmbg, string licnoIme, string imeRoditelja, string prezime,
+            string izbornaLista, DateTime datumRodj, string mestoRodj, string ulica, int broj, string mesto,
+            string brTel, string brMobTel, char stalniRadniOdnosFlag, PoslanickaGrupaBasic predsednik,
+            PoslanickaGrupaBasic zamenik, PoslanickaGrupaBasic clan)
+        {
+            NarPosId = narPosId;
+            Jmbg = jmbg;
+            LicnoIme = licnoIme;
+            ImeRoditelja = imeRoditelja;
+            Prezime = prezime;
+            IzbornaLista = izbornaLista;
+            DatumRodj = datumRodj;
+            MestoRodj = mestoRodj;
+            Ulica = ulica;
+            Broj = broj;
+            Mesto = mesto;
+            BrTel = brTel;
+            BrMobTel = brMobTel;
+            StalniRadniOdnosFlag = stalniRadniOdnosFlag;
+            PredsednikPG = predsednik;
+            ZamenikPG = zamenik;
+            ClanPG = clan;
+        }
+    }
+
+    public class StalniRadniOdnosBasic : NarodniPoslanikBasic
+    {
+        public int BrRadneKnjizice { get; set; }
+        public int Godine { get; set; }
+        public int Meseci { get; set; }
+        public int Dani { get; set; }
+        public string ImePoslFirme { get; set; }
+
+        public StalniRadniOdnosBasic()
+        {
+        }
+
+        public StalniRadniOdnosBasic(int narPosId, long jmbg, string licnoIme, string imeRoditelja, string prezime,
+            string izbornaLista, DateTime datumRodj, string mestoRodj, string ulica, int broj, string mesto,
+            string brTel, string brMobTel, char stalniRadniOdnosFlag, int brRadneKnjzice, int godine,
+            int meseci, int dani, string imePoslFirme)
+            : base(narPosId, jmbg, licnoIme, imeRoditelja, prezime, izbornaLista, datumRodj, mestoRodj, ulica, broj,
+            mesto, brTel, brMobTel, stalniRadniOdnosFlag)
+        {
+            BrRadneKnjizice = brRadneKnjzice;
+            Godine = godine;
+            Meseci = meseci;
+            Dani = dani;
+            ImePoslFirme = imePoslFirme;
+        }
+    }
+
+    public class NarodniPoslanikPregled
+    {
+        public int NarPosId { get; set; }
+        public Int64 Jmbg { get; set; }
+        public string LicnoIme { get; set; }
+        public string ImeRoditelja { get; set; }
+        public string Prezime { get; set; }
+        public string IzbornaLista { get; set; }
+        public DateTime DatumRodj { get; set; }
+        public string MestoRodj { get; set; }
+        public string Ulica { get; set; }
+        public int Broj { get; set; }
+        public string Mesto { get; set; }
+        public string BrTel { get; set; }
+        public string BrMobTel { get; set; }
+        public char StalniRadniOdnosFlag { get; set; }
+
+        public NarodniPoslanikPregled(int narPosId, long jmbg, string licnoIme, string imeRoditelja, string prezime,
+            string izbornaLista, DateTime datumRodj, string mestoRodj, string ulica, int broj, string mesto, string brTel,
+            string brMobTel, char stalniRadniOdnosFlag)
+        {
+            NarPosId = narPosId;
+            Jmbg = jmbg;
+            LicnoIme = licnoIme;
+            ImeRoditelja = imeRoditelja;
+            Prezime = prezime;
+            IzbornaLista = izbornaLista;
+            DatumRodj = datumRodj;
+            MestoRodj = mestoRodj;
+            Ulica = ulica;
+            Broj = broj;
+            Mesto = mesto;
+            BrTel = brTel;
+            BrMobTel = brMobTel;
+            StalniRadniOdnosFlag = stalniRadniOdnosFlag;
+        }
+
+        public NarodniPoslanikPregled()
+        {
+
+        }
+    }
+
+    public class StalniRadniOdnosPregled : NarodniPoslanikPregled
+    {
+        public int BrRadneKnjizice { get; set; }
+        public int Godine { get; set; }
+        public int Meseci { get; set; }
+        public int Dani { get; set; }
+        public string ImePoslFirme { get; set; }
+
+        public StalniRadniOdnosPregled(int narPosId, long jmbg, string licnoIme, string imeRoditelja, string prezime,
+            string izbornaLista, DateTime datumRodj, string mestoRodj, string ulica, int broj, string mesto,
+            string brTel, string brMobTel, char stalniRadniOdnosFlag, int brRadneKnjzice, int godine,
+            int meseci, int dani, string imePoslFirme) 
+            : base(narPosId, jmbg, licnoIme, imeRoditelja, prezime, izbornaLista, datumRodj, mestoRodj, ulica, broj,
+            mesto, brTel, brMobTel, stalniRadniOdnosFlag)
+        {
+            BrRadneKnjizice = brRadneKnjzice;
+            Godine = godine;
+            Meseci = meseci;
+            Dani = dani;
+            ImePoslFirme = imePoslFirme;
+        }
+    }
+    #endregion
+    #region PoslanickaGrupa
+    public class PoslanickaGrupaBasic
+    {
+        public int Id { get; protected set; }
+        public string JedinstvenoIme { get; set; }
+        public NarodniPoslanikBasic Predsednik { get; set; }
+        public NarodniPoslanikBasic Zamenik { get; set; }
+        public virtual IList<NarodniPoslanikBasic> Clanovi { get; set; }
+        public virtual IList<ProstorijaBasic> Prostorije { get; set; }
+        public PoslanickaGrupaBasic()
+        {
+            Clanovi = new List<NarodniPoslanikBasic>();
+            Prostorije = new List<ProstorijaBasic>();
+        }
+
+        public PoslanickaGrupaBasic(int id, string jedinstvenoIme, NarodniPoslanikBasic predsednik, NarodniPoslanikBasic zamenik)
+        {
+            Id = id;
+            JedinstvenoIme = jedinstvenoIme;
+            Predsednik = predsednik;
+            Zamenik = zamenik;
+        }
+    }
+
+    public class PoslanickaGrupaPregled
+    {
+        public int Id { get; protected set; }
+        public string JedinstvenoIme { get; set; }
+
+        public PoslanickaGrupaPregled()
+        {
+        }
+
+        public PoslanickaGrupaPregled(int id, string jedinstvenoIme)
+        {
+            Id = id;
+            JedinstvenoIme = jedinstvenoIme;
+        }
+    }
+    #endregion
+    #region RadnoTelo
+    public class RadnoTeloBasic
+    {
+        public int Id { get; protected set; }
+        public string TipRadnogTela { get; set; }
+        public NarodniPoslanikBasic Predsednik { get; set; }
+        public NarodniPoslanikBasic Zamenik { get; set; }
+        public virtual IList<NarodniPoslanikBasic> Clanovi { get; set; }
+        public ProstorijaBasic Prostorija { get; set; }
+
+        public RadnoTeloBasic()
+        {
+            Clanovi = new List<NarodniPoslanikBasic>();
+        }
+
+        public RadnoTeloBasic(int id, string tipRadnogTela)
+        {
+            Id = id;
+            TipRadnogTela = tipRadnogTela;
+        }
+
+        
+    }
+
+    public class RadnoTeloPregled
+    {
+        public int Id { get; protected set; }
+        public string TipRadnogTela { get; set; }
+        public int BrojProstorije { get; set; }
+
+        public RadnoTeloPregled()
+        {
+        }
+
+        public RadnoTeloPregled(int id, string tipRadnogTela, int brojProstorije)
+        {
+            Id = id;
+            TipRadnogTela = tipRadnogTela;
+            BrojProstorije = brojProstorije;
+        }
+    }
+    #endregion
+    #region PravniAkt
+    public class PravniAktBasic
+    {
+        public int Id { get; protected set; }
+        public string TipPravnogAkta { get; set; }
+        public string Predlozio { get; set; }
+
+        public PravniAktBasic()
+        {
+        }
+
+        public PravniAktBasic(int id, string tipPravnogAkta, string predlozio)
+        {
+            Id = id;
+            TipPravnogAkta = tipPravnogAkta;
+            Predlozio = predlozio;
+        }
+    }
+
+    public class PredlogPoslanikaBasic : PravniAktBasic
+    {
+        public virtual IList<NarodniPoslanikBasic> Poslanici { get; set; }
+        public PredlogPoslanikaBasic()
+        {
+            Poslanici = new List<NarodniPoslanikBasic>();
+        }
+
+        public PredlogPoslanikaBasic(int id, string tipPravnogAkta, string predlozio) : base(id, tipPravnogAkta, predlozio)
+        {
+        }
+    }
+
+    public class PredlogBiracaBasic : PravniAktBasic
+    {
+        public int BrojBiraca { get; set; }
+
+        PredlogBiracaBasic(int id, string tipPravnogAkta, string predlozio, int brojBiraca)
+            : base(id, tipPravnogAkta, predlozio)
+        {
+            BrojBiraca = brojBiraca;
+        }
+
+        PredlogBiracaBasic()
+        {
+        }
+    }
+
+    public class PredlogVladeBasic : PravniAktBasic
+    {
+        public PredlogVladeBasic(int id, string tipPravnogAkta, string predlozio) : base(id, tipPravnogAkta, predlozio)
+        {
+        }
+
+        public PredlogVladeBasic()
+        {
+        }
+    }
+
+    public class PravniAktPregled
+    {
+        public int Id { get; protected set; }
+        public string TipPravnogAkta { get; set; }
+        public string Predlozio { get; set; }
+
+        public PravniAktPregled()
+        {
+        }
+
+        public PravniAktPregled(int id, string tipPravnogAkta, string predlozio)
+        {
+            Id = id;
+            TipPravnogAkta = tipPravnogAkta;
+            Predlozio = predlozio;
+        }
+    }
+
+    public class PredlogPoslanikaPregled : PravniAktPregled
+    {
+        public PredlogPoslanikaPregled()
+        {
+        }
+
+        public PredlogPoslanikaPregled(int id, string tipPravnogAkta, string predlozio) : base(id, tipPravnogAkta, predlozio)
+        {
+        }
+    }
+
+    public class PredlogBiracaPregled : PravniAktPregled
+    {
+        public int BrojBiraca;
+
+        public PredlogBiracaPregled()
+        {
+        }
+
+        public PredlogBiracaPregled(int id, string tipPravnogAkta, string predlozio, int brojBiraca) : base(id, tipPravnogAkta, predlozio)
+        {
+            BrojBiraca = brojBiraca;
+        }
+    }
+
+    public class PredlogVladePregled : PravniAktPregled
+    {
+        public PredlogVladePregled()
+        {
+        }
+
+        public PredlogVladePregled(int id, string tipPravnogAkta, string predlozio) : base(id, tipPravnogAkta, predlozio)
+        {
+        }
+    }
+    #endregion
+    #region Prostorija
+    public class ProstorijaBasic
+    {
+        public int Id { get; set; }
+        public int Sprat { get; set; }
+        public RadnoTeloBasic RadnoTelo { get; set; }
+        public PoslanickaGrupaBasic PoslanickaGrupa { get; set; }
+
+        public ProstorijaBasic(int id, int sprat)
+        {
+            Id = id;
+            Sprat = sprat;
+        }
+
+        public ProstorijaBasic()
+        {
+        }
+    }
+
+    public class ProstorijaPregled
+    {
+        public int Id { get; set; }
+        public int Sprat { get; set; }
+
+        public ProstorijaPregled(int id, int sprat)
+        {
+            Id = id;
+            Sprat = sprat;
+        }
+
+        public ProstorijaPregled()
+        {
+        }
+    }
+    #endregion
+    #region Sednica
+    public class SednicaBasic
+    {
+        public int Id { get; protected set; }
+        public int BrojSednice { get; set; }
+        public int BrojSaziva { get; set; }
+        public DateTime DatumPocetka { get; set; }
+        public DateTime DatumZavrsetka { get; set; }
+        public virtual IList<RadniDanBasic> RadniDani { get; set; }
+
+        public SednicaBasic()
+        {
+            RadniDani = new List<RadniDanBasic>();
+        }
+
+        public SednicaBasic(int id, int brojSednice, int brojSaziva, DateTime datumPocetka, DateTime datumZavrsetka)
+        {
+            Id = id;
+            BrojSednice = brojSednice;
+            BrojSaziva = brojSaziva;
+            DatumPocetka = datumPocetka;
+            DatumZavrsetka = datumZavrsetka;
+        }
+    }
+
+    public class VanrednaSednicaBasic : SednicaBasic
+    {
+        public string Inicijator { get; set; }
+        public virtual IList<NarodniPoslanikBasic> Poslanici { get; set; }
+
+        public VanrednaSednicaBasic()
+        {
+            Poslanici = new List<NarodniPoslanikBasic>();
+        }
+
+        public VanrednaSednicaBasic(int id, int brojSednice, int brojSaziva, DateTime datumPocetka, DateTime datumZavrsetka,
+                 string inicijator) : base(id, brojSednice, brojSaziva, datumPocetka, datumZavrsetka)
+        {
+            Inicijator = inicijator;
+        }
+    }
+
+    public class SednicaPregled
+    {
+        public int Id { get; protected set; }
+        public int BrojSednice { get; set; }
+        public int BrojSaziva { get; set; }
+        public DateTime DatumPocetka { get; set; }
+        public DateTime DatumZavrsetka { get; set; }
+
+        public SednicaPregled()
+        {
+        }
+
+        public SednicaPregled(int id, int brojSednice, int brojSaziva, DateTime datumPocetka, DateTime datumZavrsetka)
+        {
+            Id = id;
+            BrojSednice = brojSednice;
+            BrojSaziva = brojSaziva;
+            DatumPocetka = datumPocetka;
+            DatumZavrsetka = datumZavrsetka;
+        }
+    }
+
+    public class VanrednaSednicaPregled : SednicaPregled
+    {
+        public string Inicijator { get; set; }
+
+        public VanrednaSednicaPregled()
+        {
+        }
+
+        public VanrednaSednicaPregled(int id, int brojSednice, int brojSaziva, DateTime datumPocetka, DateTime datumZavrsetka,
+             string inicijator) : base(id, brojSednice, brojSaziva, datumPocetka, datumZavrsetka)
+        {
+            Inicijator = inicijator;
+        }
+    }
+    #endregion
+    #region RadniDan
+    public class RadniDanBasic
+    {
+        public int Id { get; protected set; }
+        public DateTime VremPeriodRadaOd { get; set; }
+        public DateTime VremPeriodRadaDo { get; set; }
+        public int BrojPrisutnih { get; set; }
+        public Sednica Sednica { get; set; }
+
+        public RadniDanBasic()
+        {
+        }
+
+        public RadniDanBasic(int id, DateTime vremPeriodRadaOd, DateTime vremPeriodRadaDo, int brojPrisutnih)
+        {
+            Id = id;
+            VremPeriodRadaOd = vremPeriodRadaOd;
+            VremPeriodRadaDo = vremPeriodRadaDo;
+            BrojPrisutnih = brojPrisutnih;         
+        }
+    }
+
+    public class RadniDanPregled
+    {
+        public int Id { get; protected set; }
+        public DateTime VremPeriodRadaOd { get; set; }
+        public DateTime VremPeriodRadaDo { get; set; }
+        public int BrojPrisutnih { get; set; }
+
+        public RadniDanPregled()
+        {
+        }
+
+        public RadniDanPregled(int id, DateTime vremPeriodRadaOd, DateTime vremPeriodRadaDo, int brojPrisutnih)
+        {
+            Id = id;
+            VremPeriodRadaOd = vremPeriodRadaOd;
+            VremPeriodRadaDo = vremPeriodRadaDo;
+            BrojPrisutnih = brojPrisutnih;
+        }
+    }
+
+    #endregion
+}

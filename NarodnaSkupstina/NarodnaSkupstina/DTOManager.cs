@@ -1,0 +1,1216 @@
+﻿using NHibernate;
+using System.Windows.Forms;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using NHibernate.Linq;
+using NarodnaSkupstina.Entiteti;
+using NarodnaSkupstina.Forme;
+
+namespace NarodnaSkupstina
+{
+    public class DTOManager
+    {
+        public static List<NarodniPoslanikPregled> vratiSvePoslanike()
+        {
+            List<NarodniPoslanikPregled> poslanici = new List<NarodniPoslanikPregled>();
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                IEnumerable<NarodniPoslanik> sviPoslanici = from o in s.Query<NarodniPoslanik>()
+                                                            select o;
+
+                foreach (NarodniPoslanik p in sviPoslanici)
+                {
+                    poslanici.Add(new NarodniPoslanikPregled(p.Id, p.Jmbg, p.LicnoIme, p.ImeRoditelja, p.Prezime,
+                        p.IzbornaLista, p.DatumRodj, p.Mesto, p.Ulica, p.Broj, p.Mesto, p.BrTel, p.BrMobTel, p.StalniRadniOdnosFlag));
+                }
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+
+            return poslanici;
+        }
+
+        public static void dodajPG(PoslanickaGrupaBasic pgb)
+        {
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                NarodniPoslanik pre = s.Load<NarodniPoslanik>(pgb.Predsednik.NarPosId); ;
+                NarodniPoslanik zam = s.Load<NarodniPoslanik>(pgb.Zamenik.NarPosId);
+
+                PoslanickaGrupa pg = new PoslanickaGrupa();
+                pg.JedinstvenoIme = pgb.JedinstvenoIme;
+                pg.Predsednik = pre;
+                pg.Zamenik = zam;
+                pg.Clanovi.Add(pre);
+                pg.Clanovi.Add(zam);
+                pre.PredsednikPG = pg;
+                zam.ZamenikPG = pg;
+                zam.ClanPG = pg;
+                pre.ClanPG = pg;
+
+                s.Save(pg);
+
+                s.Flush();
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+        }
+
+        public static NarodniPoslanikBasic postaviZamenikaPG(int id)
+        {
+            NarodniPoslanikBasic zb = new NarodniPoslanikBasic();
+
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                NarodniPoslanik p = s.Load<NarodniPoslanik>(id);
+
+                if (p.ClanPG == null)
+                    zb = new NarodniPoslanikBasic(p.Id, p.Jmbg, p.LicnoIme, p.ImeRoditelja, p.Prezime,
+                        p.IzbornaLista, p.DatumRodj, p.Mesto, p.Ulica, p.Broj, p.Mesto, p.BrTel, p.BrMobTel, p.StalniRadniOdnosFlag);
+                else throw new Exception("Poslanik je vec clan nekog radnog tela");
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+            return zb;
+        }
+
+        public static NarodniPoslanikBasic postaviPredsednikaPG(int id)
+        {
+            NarodniPoslanikBasic pb = new NarodniPoslanikBasic();
+
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                NarodniPoslanik p = s.Load<NarodniPoslanik>(id);
+
+                if (p.ClanPG == null)
+                    pb = new NarodniPoslanikBasic(p.Id, p.Jmbg, p.LicnoIme, p.ImeRoditelja, p.Prezime,
+                        p.IzbornaLista, p.DatumRodj, p.Mesto, p.Ulica, p.Broj, p.Mesto, p.BrTel, p.BrMobTel, p.StalniRadniOdnosFlag);
+                else throw new Exception("Poslanik je vec clan nekog radnog tela");
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+            return pb;
+        }
+
+        public static void obrisiClanaPG(int idClanaPG)
+        {
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                NarodniPoslanik o = s.Load<NarodniPoslanik>(idClanaPG);
+
+                PoslanickaGrupa p = s.Load<PoslanickaGrupa>(o.ClanPG.Id);
+
+                o.ClanPG = null;
+                o.ZamenikPG = null;
+                o.PredsednikPG = null;
+
+                p.Clanovi.Remove(o);
+                if (p.Predsednik == o)
+                    p.Predsednik = null;
+                if (p.Zamenik == o)
+                    p.Zamenik = null;
+
+                s.Save(o);
+
+                s.Flush();
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+        }
+
+        public static List<StalniRadniOdnosPregled> vratiSveSRD()
+        {
+            List<StalniRadniOdnosPregled> poslanici = new List<StalniRadniOdnosPregled>();
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                IEnumerable<StalniRadniOdnos> sviPoslanici = from o in s.Query<StalniRadniOdnos>()
+                                                             select o;
+
+                foreach (StalniRadniOdnos p in sviPoslanici)
+                {
+                    poslanici.Add(new StalniRadniOdnosPregled(p.Id, p.Jmbg, p.LicnoIme, p.ImeRoditelja, p.Prezime,
+                        p.IzbornaLista, p.DatumRodj, p.Mesto, p.Ulica, p.Broj, p.Mesto, p.BrTel, p.BrMobTel, p.StalniRadniOdnosFlag,
+                        p.BrRadneKnjizice, p.Godine, p.Meseci, p.Dani, p.ImePoslFirme));
+                }
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+
+            return poslanici;
+        }
+
+        public static void dodajPoslanika(NarodniPoslanikBasic p)
+        {
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                NarodniPoslanik o = new NarodniPoslanik();
+
+                o.Jmbg = p.Jmbg;
+                o.LicnoIme = p.LicnoIme;
+                o.ImeRoditelja = p.ImeRoditelja;
+                o.Prezime = p.Prezime;
+                o.IzbornaLista = p.IzbornaLista;
+                o.DatumRodj = p.DatumRodj;
+                o.MestoRodj = p.MestoRodj;
+                o.Ulica = p.Ulica;
+                o.Broj = p.Broj;
+                o.Mesto = p.Mesto;
+                o.BrTel = p.BrTel;
+                o.BrMobTel = p.BrMobTel;
+                o.StalniRadniOdnosFlag = p.StalniRadniOdnosFlag;
+
+                s.Save(o);
+
+                s.Flush();
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+        }
+
+        public static void dodajPoslanika(StalniRadniOdnosBasic p)
+        {
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                StalniRadniOdnos o = new StalniRadniOdnos();
+
+                o.Jmbg = p.Jmbg;
+                o.LicnoIme = p.LicnoIme;
+                o.ImeRoditelja = p.ImeRoditelja;
+                o.Prezime = p.Prezime;
+                o.IzbornaLista = p.IzbornaLista;
+                o.DatumRodj = p.DatumRodj;
+                o.MestoRodj = p.MestoRodj;
+                o.Ulica = p.Ulica;
+                o.Broj = p.Broj;
+                o.Mesto = p.Mesto;
+                o.BrTel = p.BrTel;
+                o.BrMobTel = p.BrMobTel;
+                o.StalniRadniOdnosFlag = p.StalniRadniOdnosFlag;
+                o.BrRadneKnjizice = p.BrRadneKnjizice;
+                o.Godine = p.Godine;
+                o.Meseci = p.Meseci;
+                o.Dani = p.Dani;
+                o.ImePoslFirme = p.ImePoslFirme;
+
+                s.Save(o);
+
+                s.Flush();
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+        }
+
+        public static NarodniPoslanikBasic vratiPoslanika(int id)
+        {
+            NarodniPoslanikBasic pb = new NarodniPoslanikBasic();
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                NarodniPoslanik o = s.Load<NarodniPoslanik>(id);
+                pb = new NarodniPoslanikBasic(o.Id, o.Jmbg, o.LicnoIme, o.ImeRoditelja, o.Prezime, o.IzbornaLista, o.DatumRodj,
+                    o.MestoRodj, o.Ulica, o.Broj, o.Mesto, o.BrTel, o.BrMobTel, o.StalniRadniOdnosFlag);
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+
+            return pb;
+        }
+
+        public static StalniRadniOdnosBasic vratiStalnogPoslanika(int id)
+        {
+            StalniRadniOdnosBasic pb = new StalniRadniOdnosBasic();
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                StalniRadniOdnos o = s.Load<StalniRadniOdnos>(id);
+                pb = new StalniRadniOdnosBasic(o.Id, o.Jmbg, o.LicnoIme, o.ImeRoditelja, o.Prezime, o.IzbornaLista, o.DatumRodj,
+                    o.MestoRodj, o.Ulica, o.Broj, o.Mesto, o.BrTel, o.BrMobTel, o.StalniRadniOdnosFlag, o.BrRadneKnjizice, o.Godine,
+                    o.Meseci, o.Dani, o.ImePoslFirme);
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+
+            return pb;
+        }
+
+        public static StalniRadniOdnosBasic IzmeniStalnogPoslanika(StalniRadniOdnosBasic p)
+        {
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                StalniRadniOdnos o = s.Load<StalniRadniOdnos>(p.NarPosId);
+                o.Jmbg = p.Jmbg;
+                o.LicnoIme = p.LicnoIme;
+                o.ImeRoditelja = p.ImeRoditelja;
+                o.Prezime = p.Prezime;
+                o.IzbornaLista = p.IzbornaLista;
+                o.DatumRodj = p.DatumRodj;
+                o.MestoRodj = p.MestoRodj;
+                o.Ulica = p.Ulica;
+                o.Broj = p.Broj;
+                o.Mesto = p.Mesto;
+                o.BrTel = p.BrTel;
+                o.BrMobTel = p.BrMobTel;
+                o.StalniRadniOdnosFlag = p.StalniRadniOdnosFlag;
+                o.BrRadneKnjizice = p.BrRadneKnjizice;
+                o.Godine = p.Godine;
+                o.Meseci = p.Meseci;
+                o.Dani = p.Dani;
+                o.ImePoslFirme = p.ImePoslFirme;
+
+                s.Update(o);
+                s.Flush();
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+
+            return p;
+        }
+
+        public static NarodniPoslanikBasic IzmeniPoslanika(NarodniPoslanikBasic p)
+        {
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                NarodniPoslanik o = s.Load<NarodniPoslanik>(p.NarPosId);
+                o.Jmbg = p.Jmbg;
+                o.LicnoIme = p.LicnoIme;
+                o.ImeRoditelja = p.ImeRoditelja;
+                o.Prezime = p.Prezime;
+                o.IzbornaLista = p.IzbornaLista;
+                o.DatumRodj = p.DatumRodj;
+                o.MestoRodj = p.MestoRodj;
+                o.Ulica = p.Ulica;
+                o.Broj = p.Broj;
+                o.Mesto = p.Mesto;
+                o.BrTel = p.BrTel;
+                o.BrMobTel = p.BrMobTel;
+                o.StalniRadniOdnosFlag = p.StalniRadniOdnosFlag;
+
+                s.Update(o);
+                s.Flush();
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+
+            return p;
+        }
+
+        public static void obrisiPoslanika(int id)
+        {
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                NarodniPoslanik o = s.Load<NarodniPoslanik>(id);
+
+                s.Delete(o);
+
+                s.Flush();
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+        }
+
+        public static List<PoslanickaGrupaPregled> vratiSvePG()
+        {
+            List<PoslanickaGrupaPregled> poslGrupe = new List<PoslanickaGrupaPregled>();
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                IEnumerable<PoslanickaGrupa> svePG = from o in s.Query<PoslanickaGrupa>()
+                                                     select o;
+
+                foreach (PoslanickaGrupa p in svePG)
+                {
+                    poslGrupe.Add(new PoslanickaGrupaPregled(p.Id, p.JedinstvenoIme));
+                }
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+
+            return poslGrupe;
+        }
+
+        public static List<NarodniPoslanikPregled> vratiClanovePG(int idPG)
+        {
+            List<NarodniPoslanikPregled> clanovi = new List<NarodniPoslanikPregled>();
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                IEnumerable<NarodniPoslanik> sviClanovi = from o in s.Query<NarodniPoslanik>()
+                                                          where o.ClanPG.Id == idPG
+                                                          select o;
+
+                foreach (NarodniPoslanik p in sviClanovi)
+                {
+                    clanovi.Add(new NarodniPoslanikPregled(p.Id, p.Jmbg, p.LicnoIme, p.ImeRoditelja, p.Prezime,
+                        p.IzbornaLista, p.DatumRodj, p.Mesto, p.Ulica, p.Broj, p.Mesto, p.BrTel, p.BrMobTel, p.StalniRadniOdnosFlag));
+                }
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+
+            return clanovi;
+        }
+
+        public static NarodniPoslanikPregled vratiPredsednikaPG(int idPG)
+        {
+            NarodniPoslanikPregled pr = new NarodniPoslanikPregled();
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                IEnumerable<NarodniPoslanik> predsednik = from o in s.Query<NarodniPoslanik>()
+                                                          where o.PredsednikPG.Id == idPG
+                                                          select o;
+
+                foreach (NarodniPoslanik p in predsednik)
+                {
+                    pr = new NarodniPoslanikPregled(p.Id, p.Jmbg, p.LicnoIme, p.ImeRoditelja, p.Prezime,
+                        p.IzbornaLista, p.DatumRodj, p.Mesto, p.Ulica, p.Broj, p.Mesto, p.BrTel, p.BrMobTel, p.StalniRadniOdnosFlag);
+                }
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+            return pr;
+        }
+
+        public static NarodniPoslanikPregled vratiZamenikaPG(int idPG)
+        {
+            NarodniPoslanikPregled z = new NarodniPoslanikPregled();
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                IEnumerable<NarodniPoslanik> zamenik = from o in s.Query<NarodniPoslanik>()
+                                                       where o.ZamenikPG.Id == idPG
+                                                       select o;
+
+                foreach (NarodniPoslanik p in zamenik)
+                {
+                    z = new NarodniPoslanikPregled(p.Id, p.Jmbg, p.LicnoIme, p.ImeRoditelja, p.Prezime,
+                        p.IzbornaLista, p.DatumRodj, p.Mesto, p.Ulica, p.Broj, p.Mesto, p.BrTel, p.BrMobTel, p.StalniRadniOdnosFlag);
+                }
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+            return z;
+        }
+
+        public static void dodajClanaPG(int idNP, int idPG)
+        {
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                NarodniPoslanik np = s.Load<NarodniPoslanik>(idNP);
+
+                PoslanickaGrupa pg = s.Load<PoslanickaGrupa>(idPG);
+
+                if (np.ClanPG == null)
+                {
+                    pg.Clanovi.Add(np);
+                    np.ClanPG = pg;
+                }
+                else throw new Exception("Poslanik je vec clan nekog radnog tela");
+
+                s.Save(pg);
+
+                s.Flush();
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+        }
+		
+		public static void obrisiPG1(int id)
+        {
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                PoslanickaGrupa pg = s.Load<PoslanickaGrupa>(id);
+
+                foreach (NarodniPoslanik p in pg.Clanovi)
+                {
+                    p.ClanPG = null;
+                    p.PredsednikPG = null;
+                    p.ZamenikPG = null;
+                    s.Save(p);
+                }
+
+                foreach (Prostorija p in pg.Prostorije)
+                {
+                    p.PoslanickaGrupa = null;
+                    s.Save(p);
+                }
+
+                s.Flush();
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+        }
+
+        public static void obrisiPG(int id)
+        {
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                PoslanickaGrupa pg = s.Load<PoslanickaGrupa>(id);
+
+                obrisiPG1(id);
+
+                s.Delete(pg);
+
+                s.Flush();
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+        }
+
+        public static List<RadnoTeloPregled> vratiSvaRadnaTela()
+        {
+            List<RadnoTeloPregled> rtela = new List<RadnoTeloPregled>();
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                IEnumerable<RadnoTelo> svaRTela = from o in s.Query<RadnoTelo>()
+                                                  select o;
+
+                foreach (RadnoTelo p in svaRTela)
+                {
+                    rtela.Add(new RadnoTeloPregled(p.Id, p.TipRadnogTela, p.Prostorija.Id));
+                }
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+
+            return rtela;
+        }
+
+        public static NarodniPoslanikBasic postaviPredsednikaRT(int id)
+        {
+            NarodniPoslanikBasic pb = new NarodniPoslanikBasic();
+
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                NarodniPoslanik p = s.Load<NarodniPoslanik>(id);
+
+                if (p.ClanRT == null)
+                    pb = new NarodniPoslanikBasic(p.Id, p.Jmbg, p.LicnoIme, p.ImeRoditelja, p.Prezime,
+                        p.IzbornaLista, p.DatumRodj, p.Mesto, p.Ulica, p.Broj, p.Mesto, p.BrTel, p.BrMobTel, p.StalniRadniOdnosFlag);
+                //else throw new Exception("Poslanik je vec clan nekog radnog tela");
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+            return pb;
+        }
+
+        public static NarodniPoslanikBasic postaviZamenikaRT(int id)
+        {
+            NarodniPoslanikBasic pb = new NarodniPoslanikBasic();
+
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                NarodniPoslanik p = s.Load<NarodniPoslanik>(id);
+
+                if (p.ClanRT == null)
+                    pb = new NarodniPoslanikBasic(p.Id, p.Jmbg, p.LicnoIme, p.ImeRoditelja, p.Prezime,
+                        p.IzbornaLista, p.DatumRodj, p.Mesto, p.Ulica, p.Broj, p.Mesto, p.BrTel, p.BrMobTel, p.StalniRadniOdnosFlag);
+                //else throw new Exception("Poslanik je vec clan nekog radnog tela");
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+            return pb;
+        }
+
+        public static ProstorijaBasic vratiProstoriju(int brojP)
+        {
+            ProstorijaBasic pb = new ProstorijaBasic();
+
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                Prostorija p = s.Load<Prostorija>(brojP);
+
+                pb = new ProstorijaBasic(p.Id, p.Sprat);
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+            return pb;
+        }
+
+        public static void dodajRT(RadnoTeloBasic rtb)
+        {
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                NarodniPoslanik pre = s.Load<NarodniPoslanik>(rtb.Predsednik.NarPosId); ;
+                NarodniPoslanik zam = s.Load<NarodniPoslanik>(rtb.Zamenik.NarPosId);
+                Prostorija p = s.Load<Prostorija>(rtb.Prostorija.Id);
+                RadnoTelo rt = new RadnoTelo();
+                rt.TipRadnogTela = rtb.TipRadnogTela;
+                rt.Predsednik = pre;
+                rt.Zamenik = zam;
+                rt.Clanovi.Add(pre);
+                rt.Clanovi.Add(zam);
+                pre.PredsednikRT = rt;
+                zam.ZamenikRT = rt;
+                pre.ClanRT = rt;
+                zam.ClanRT = rt;
+                p.RadnoTelo = rt;
+                rt.Prostorija = p;
+
+                s.Save(rt);
+
+                s.Flush();
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+        }
+		
+		public static void obrisiRT1(int id)
+        {
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                RadnoTelo rt = s.Load<RadnoTelo>(id);
+
+                foreach (NarodniPoslanik p in rt.Clanovi)
+                {
+                    p.ClanRT = null;
+                    p.PredsednikRT = null;
+                    p.ZamenikRT = null;
+                    s.Save(p);
+                }
+
+                rt.Prostorija.RadnoTelo = null;
+                s.Save(rt.Prostorija);
+
+                s.Flush();
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+        }
+
+        public static void obrisiRT(int id)
+        {
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                RadnoTelo rt = s.Load<RadnoTelo>(id);
+
+                obrisiRT1(id);
+
+                s.Delete(rt);
+
+                s.Flush();
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+        }
+
+        public static List<NarodniPoslanikPregled> vratiClanoveRT(int idRT)
+        {
+            List<NarodniPoslanikPregled> clanovi = new List<NarodniPoslanikPregled>();
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                IEnumerable<NarodniPoslanik> sviClanovi = from o in s.Query<NarodniPoslanik>()
+                                                          where o.ClanRT.Id == idRT
+                                                          select o;
+
+                foreach (NarodniPoslanik p in sviClanovi)
+                {
+                    clanovi.Add(new NarodniPoslanikPregled(p.Id, p.Jmbg, p.LicnoIme, p.ImeRoditelja, p.Prezime,
+                        p.IzbornaLista, p.DatumRodj, p.Mesto, p.Ulica, p.Broj, p.Mesto, p.BrTel, p.BrMobTel, p.StalniRadniOdnosFlag));
+                }
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+
+            return clanovi;
+        }
+
+        public static NarodniPoslanikPregled vratiPredsednikaRT(int idRT)
+        {
+            NarodniPoslanikPregled pr = new NarodniPoslanikPregled();
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                IEnumerable<NarodniPoslanik> predsednik = from o in s.Query<NarodniPoslanik>()
+                                                          where o.PredsednikRT.Id == idRT
+                                                          select o;
+
+                foreach (NarodniPoslanik p in predsednik)
+                {
+                    pr = new NarodniPoslanikPregled(p.Id, p.Jmbg, p.LicnoIme, p.ImeRoditelja, p.Prezime,
+                        p.IzbornaLista, p.DatumRodj, p.Mesto, p.Ulica, p.Broj, p.Mesto, p.BrTel, p.BrMobTel, p.StalniRadniOdnosFlag);
+                }
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+            return pr;
+        }
+
+        public static NarodniPoslanikPregled vratiZamenikaRT(int idRT)
+        {
+            NarodniPoslanikPregled z = new NarodniPoslanikPregled();
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                IEnumerable<NarodniPoslanik> zamenik = from o in s.Query<NarodniPoslanik>()
+                                                       where o.ZamenikRT.Id == idRT
+                                                       select o;
+
+                foreach (NarodniPoslanik p in zamenik)
+                {
+                    z = new NarodniPoslanikPregled(p.Id, p.Jmbg, p.LicnoIme, p.ImeRoditelja, p.Prezime,
+                        p.IzbornaLista, p.DatumRodj, p.Mesto, p.Ulica, p.Broj, p.Mesto, p.BrTel, p.BrMobTel, p.StalniRadniOdnosFlag);
+                }
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+            return z;
+        }
+
+        public static void dodajClanaRT(int idNP, int idRT)
+        {
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                NarodniPoslanik np = s.Load<NarodniPoslanik>(idNP);
+
+                RadnoTelo rt = s.Load<RadnoTelo>(idRT);
+
+                if (np.ClanRT == null)
+                {
+                    rt.Clanovi.Add(np);
+                    np.ClanRT = rt;
+                }
+                else throw new Exception("Poslanik je vec clan nekog radnog tela");
+
+                s.Save(rt);
+
+                s.Flush();
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+        }
+
+        public static void obrisiClanaRT(int idClanaRT)
+        {
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                NarodniPoslanik o = s.Load<NarodniPoslanik>(idClanaRT);
+
+                RadnoTelo p = s.Load<RadnoTelo>(o.ClanRT.Id);
+
+                o.ClanRT = null;
+                o.ZamenikRT = null;
+                o.PredsednikRT = null;
+
+                p.Clanovi.Remove(o);
+                if (p.Predsednik == o)
+                    p.Predsednik = null;
+                if (p.Zamenik == o)
+                    p.Zamenik = null;
+
+                s.Save(o);
+
+                s.Flush();
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+
+
+        }
+
+        public static List<SednicaPregled> vratiSednice()
+        {
+            List<SednicaPregled> sednice = new List<SednicaPregled>();
+
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                IEnumerable<Sednica> sed = from o in s.Query<Sednica>()
+                                           select o;
+
+                foreach (Sednica vs in sed)
+                {
+                    sednice.Add(new SednicaPregled(vs.Id, vs.BrojSednice, vs.BrojSaziva, vs.DatumPocetka,
+                        vs.DatumZavrsetka));
+                }
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+
+            return sednice;
+        }
+
+        public static List<VanrednaSednicaPregled> vratiVanredne()
+        {
+            List<VanrednaSednicaPregled> vanredne = new List<VanrednaSednicaPregled>();
+
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                IEnumerable<VanrednaSednica> sednice = from o in s.Query<VanrednaSednica>()
+                                                       select o;
+
+                foreach (VanrednaSednica vs in sednice)
+                {
+                    vanredne.Add(new VanrednaSednicaPregled(vs.Id, vs.BrojSednice, vs.BrojSaziva, vs.DatumPocetka,
+                        vs.DatumZavrsetka, vs.Inicijator));
+                }
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+
+            return vanredne;
+        }
+
+        public static List<NarodniPoslanikPregled> vratiZahtevePoslanika(int id)
+        {
+            List<NarodniPoslanikPregled> zahtevi = new List<NarodniPoslanikPregled>();
+
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                VanrednaSednica v = s.Load<VanrednaSednica>(id);
+
+                List<NarodniPoslanik> poslanici = v.Poslanici.ToList();
+
+                foreach (NarodniPoslanik p in poslanici)
+                {
+                    zahtevi.Add(new NarodniPoslanikPregled(p.Id, p.Jmbg, p.LicnoIme, p.ImeRoditelja, p.Prezime,
+                        p.IzbornaLista, p.DatumRodj, p.Mesto, p.Ulica, p.Broj, p.Mesto, p.BrTel, p.BrMobTel, p.StalniRadniOdnosFlag));
+                }
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+
+            return zahtevi;
+        }
+
+        public static List<PredlogPoslanikaPregled> vratiPredlogePoslanika()
+        {
+            List<PredlogPoslanikaPregled> pa = new List<PredlogPoslanikaPregled>();
+
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                IEnumerable<PredlogPoslanika> pravniAkti = from o in s.Query<PredlogPoslanika>()
+                                            select o;
+
+                foreach (PredlogPoslanika p in pravniAkti)
+                {
+                    pa.Add(new PredlogPoslanikaPregled(p.Id, p.TipPravnogAkta, p.Predlozio));
+                }
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+
+            return pa;
+        }
+
+        public static List<PredlogVladePregled> vratiPredlogeVlade()
+        {
+            List<PredlogVladePregled> pa = new List<PredlogVladePregled>();
+
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                IEnumerable<PredlogVlade> pravniAkti = from o in s.Query<PredlogVlade>()
+                                                           select o;
+
+                foreach (PredlogVlade p in pravniAkti)
+                {
+                    pa.Add(new PredlogVladePregled(p.Id, p.TipPravnogAkta, p.Predlozio));
+                }
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+
+            return pa;
+        }
+
+        public static List<PredlogBiracaPregled> vratiPredlogeBiraca()
+        {
+            List<PredlogBiracaPregled> pa = new List<PredlogBiracaPregled>();
+
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                IEnumerable<PredlogBiraca> pravniAkti = from o in s.Query<PredlogBiraca>()
+                                                           select o;
+
+                foreach (PredlogBiraca p in pravniAkti)
+                {
+                    pa.Add(new PredlogBiracaPregled(p.Id, p.TipPravnogAkta, p.Predlozio, p.BrojBiraca));
+                }
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+
+            return pa;
+        }
+
+        public static List<NarodniPoslanikPregled> vratiPredlagace(int id)
+        {
+            List<NarodniPoslanikPregled> predlagaci = new List<NarodniPoslanikPregled>();
+
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                PredlogPoslanika pos = s.Load<PredlogPoslanika>(id);
+
+                
+                foreach(NarodniPoslanik p in pos.Poslanici)
+                {
+                    predlagaci.Add(new NarodniPoslanikPregled(p.Id, p.Jmbg, p.LicnoIme, p.ImeRoditelja, p.Prezime,
+                        p.IzbornaLista, p.DatumRodj, p.Mesto, p.Ulica, p.Broj, p.Mesto, p.BrTel, p.BrMobTel, p.StalniRadniOdnosFlag));
+                }
+
+                s.Close();
+            }
+            catch(Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+
+            return predlagaci;
+        }
+
+        public static List<RadniDanPregled> vratiRadneDane(int id)
+        {
+            List<RadniDanPregled> dani = new List<RadniDanPregled>();
+
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                IEnumerable<RadniDan> rd = from o in s.Query<RadniDan>()
+                                           where o.Sednica.Id == id
+                                           select o;
+
+                foreach(RadniDan r in rd)
+                {
+                    dani.Add(new RadniDanPregled(r.Id, r.VremPeriodRadaOd, r.VremPeriodRadaDo, r.BrojPrisutnih));
+                }
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+
+            return dani;
+        }
+
+        public static void dodajRadniDan(RadniDanBasic dan, int id)
+        {
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                RadniDan d = new RadniDan();
+
+                Sednica sd = s.Load<Sednica>(id);
+
+                d.VremPeriodRadaOd = dan.VremPeriodRadaOd;
+                d.VremPeriodRadaDo = dan.VremPeriodRadaDo;
+                d.BrojPrisutnih = dan.BrojPrisutnih;
+
+                sd.RadniDani.Add(d);
+                d.Sednica = sd;
+
+                s.Save(d);
+
+                s.Flush();
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+        }
+
+        public static void dodajSednicu(SednicaBasic se)
+        {
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                Sednica sednica = new Sednica();
+
+                sednica.BrojSednice = se.BrojSednice;
+                sednica.BrojSaziva = se.BrojSaziva;
+                sednica.DatumPocetka = se.DatumPocetka;
+                sednica.DatumZavrsetka = se.DatumZavrsetka;
+
+                s.Save(sednica);
+
+                s.Flush();
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+        }
+
+        public static void dodajSednicu(VanrednaSednicaBasic se)
+        {
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                VanrednaSednica sednica = new VanrednaSednica();
+
+                sednica.BrojSednice = se.BrojSednice;
+                sednica.BrojSaziva = se.BrojSaziva;
+                sednica.DatumPocetka = se.DatumPocetka;
+                sednica.DatumZavrsetka = se.DatumZavrsetka;
+                sednica.Inicijator = se.Inicijator;
+
+                s.Save(sednica);
+
+                s.Flush();
+
+                s.Close();
+            }
+            catch (Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+        }
+
+        public static List<ProstorijaPregled> vratiProstorije(int idPG)
+        {
+            List<ProstorijaPregled> p = new List<ProstorijaPregled>();
+            try
+            {
+                ISession s = DataLayer.GetSession();
+
+                PoslanickaGrupa pg = s.Load<PoslanickaGrupa>(idPG);
+
+                foreach(Prostorija o in pg.Prostorije)
+                {
+                    p.Add(new ProstorijaPregled(o.Id, o.Sprat));
+                }
+
+                s.Close();
+            }
+            catch(Exception ec)
+            {
+                MessageBox.Show(ec.Message);
+            }
+            return p;
+        }
+        
+    }
+}

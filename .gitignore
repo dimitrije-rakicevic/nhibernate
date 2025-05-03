@@ -1,0 +1,33 @@
+# --- Common .NET / Visual Studio ---
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.log
+*.vs/
+*.vshost.*
+TestResults/
+packages/
+*.nupkg
+artifacts/
+
+# --- NHibernate specific ---
+**/hibernate.cfg.xml
+**/hibernate.log
+**/NHibernateGeneratedProxies/
+**/*.generated.cs
+
+# --- ASP.NET Web API (oracleWebApiService) ---
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
+publish/
+wwwroot/
+
+# --- OS / Tools / IDE ---
+.idea/
+*.DS_Store
+Thumbs.db
+.env
+.env.*
